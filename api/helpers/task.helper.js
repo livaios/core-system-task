@@ -7,9 +7,9 @@ const create = async (authorId, name) => {
       values: [authorId, name]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const edit = async (id, name) => {
@@ -19,9 +19,9 @@ const edit = async (id, name) => {
       values: [id, name]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const generateWhere = req => {
@@ -53,7 +53,7 @@ const generateWhere = req => {
     }
     return whereString
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const generateOrder = req => {
@@ -77,7 +77,7 @@ const generateOrder = req => {
     }
     return orderString
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const view = async (where, order, values) => {
@@ -90,7 +90,6 @@ const view = async (where, order, values) => {
         order,
       values
     }
-    console.log(query)
     const res = await pool.query(query)
     return res
   } catch (err) {
@@ -136,9 +135,9 @@ const acceptApp1 = async (taskId, applicantId) => {
       values: [taskId, applicantId]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const acceptApp2 = async (taskId, applicantId) => {
@@ -149,9 +148,9 @@ const acceptApp2 = async (taskId, applicantId) => {
       values: [taskId, applicantId]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const addApp = async (taskId, applicantId) => {
@@ -162,9 +161,9 @@ const addApp = async (taskId, applicantId) => {
       values: [taskId, applicantId]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const submitText = async (taskId, text, time) => {
@@ -175,9 +174,9 @@ const submitText = async (taskId, text, time) => {
       values: [taskId, text, time]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const checkSubmitted = async taskId => {
@@ -199,9 +198,21 @@ const confirmTask = async taskId => {
       values: [taskId]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
+  }
+}
+const viewAll = async () => {
+  try {
+    const query = {
+      text:
+        'SELECT * FROM tasks t INNER JOIN applications a ON t.id = a.task_id WHERE t.is_frozen = false GROUP BY t.id,a.task_id,a.user_id'
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (err) {
+    return err
   }
 }
 module.exports = {
@@ -217,5 +228,6 @@ module.exports = {
   addApp,
   submitText,
   checkSubmitted,
-  confirmTask
+  confirmTask,
+  viewAll
 }

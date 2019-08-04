@@ -15,7 +15,8 @@ const {
   sign_up,
   checkSuspend,
   suspending,
-  checkCredentials
+  checkCredentials,
+  view
 } = require('../helpers/accounts.helper')
 const {
   validation,
@@ -148,9 +149,18 @@ const account_freeze = async (req, res) => {
     console.log(exception)
   }
 }
+const account_get = async (req, res) => {
+  try {
+    const accounts = await view()
+    res.json({ accounts })
+  } catch (exception) {
+    console.log(exception)
+  }
+}
 module.exports = {
   account_signup,
   account_suspend,
   account_signin,
-  account_freeze
+  account_freeze,
+  account_get
 }

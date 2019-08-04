@@ -15,7 +15,8 @@ const {
   checkAttendance,
   confirmMeeting,
   finalConfirm,
-  confirm
+  confirm,
+  view
 } = require('../helpers/meeting.helper')
 const bodyValidator = require('../helpers/validations/meeting.validation')
 const freezeValidator = require('../helpers/validations/general.validation')
@@ -175,9 +176,18 @@ const meeting_freeze = async (req, res) => {
     console.log(exception)
   }
 }
+const meeting_get = async (req, res) => {
+  try {
+    const meetings = await view()
+    res.json({ meetings })
+  } catch (exception) {
+    console.log(exception)
+  }
+}
 module.exports = {
   meeting_create,
   meeting_edit,
   meeting_confirm,
-  meeting_freeze
+  meeting_freeze,
+  meeting_get
 }

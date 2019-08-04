@@ -32,9 +32,9 @@ const sign_up = async (username, password) => {
       values: [username, password]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const suspending = async (id, toSuspend) => {
@@ -44,9 +44,9 @@ const suspending = async (id, toSuspend) => {
       values: [id, toSuspend]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const checkCredentials = async (username, password) => {
@@ -61,11 +61,24 @@ const checkCredentials = async (username, password) => {
     return err
   }
 }
+const view = async () => {
+  try {
+    const query = {
+      text:
+        'SELECT * FROM accounts a INNER JOIN tasks t ON a.id = t.author_id WHERE a.is_frozen = false GROUP BY a.id,t.id'
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (err) {
+    return err
+  }
+}
 
 module.exports = {
   checkUsername,
   sign_up,
   suspending,
   checkSuspend,
-  checkCredentials
+  checkCredentials,
+  view
 }
