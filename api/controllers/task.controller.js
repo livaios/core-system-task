@@ -18,7 +18,9 @@ const {
   acceptApp1,
   acceptApp2,
   addApp,
-  submitText
+  submitText,
+  checkSubmitted,
+  confirmTask
 } = require('../helpers/task.helper')
 const bodyValidator = require('../helpers/validations/task.validation')
 const freezeValidator = require('../helpers/validations/general.validation')
@@ -27,7 +29,8 @@ const {
   validation,
   notFound,
   suspension,
-  frozen
+  frozen,
+  notSubmit
 } = require('../constants/errorCodes')
 
 const task_create = async (req, res) => {
@@ -231,6 +234,28 @@ const task_submit = async (req, res) => {
 }
 const task_completed = async (req, res) => {
   try {
+    const notValid = await validations(req, bodyValidator.confirmValidation)
+    if (notValid) {
+      return res
+        .status(400)
+        .send(errorCreator(validation, notValid.details[0].message))
+    }
+    const { taskId } = req.body
+    const checkTask = await checkId('tasks', taskId)
+    if (checkTask === 0) {
+      return res.status(400).send(errorCreator(notFound, 'Task not found'))
+    }
+    const checkFreeze = await checkFrozen('tasks', taskId, true)
+    if (checkFreeze !== 0) {
+      return res
+        .status(400)
+        .send(errorCreator(frozen, 'Task frozen cannot view or edit'))
+    }
+    const checkSubmit = await checkSubmitted(taskId)
+    if (checkSubmit === 0)
+      return res.status(400).send(errorCreator(notSubmit, 'Task not submitted'))
+    const task = await confirmTask(taskId)
+    return res.json(task)
   } catch (exception) {
     console.log(exception)
   }

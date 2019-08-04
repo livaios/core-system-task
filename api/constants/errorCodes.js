@@ -10,11 +10,14 @@ const frozen = 'E001'
 const wrongPassword = 'E001'
 
 const notFound = 'E001'
+
+const notSubmit = 'E001'
 module.exports = {
   validation,
   usernameExist,
   suspension,
   frozen,
   wrongPassword,
-  notFound
+  notFound,
+  notSubmit
 }
