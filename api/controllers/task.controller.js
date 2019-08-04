@@ -13,7 +13,12 @@ const {
   generateWhere,
   generateOrder,
   generateValues,
-  view
+  view,
+  checkApp,
+  acceptApp1,
+  acceptApp2,
+  addApp,
+  submitText
 } = require('../helpers/task.helper')
 const bodyValidator = require('../helpers/validations/task.validation')
 const freezeValidator = require('../helpers/validations/general.validation')
@@ -73,7 +78,7 @@ const task_edit = async (req, res) => {
     if (checkFreeze !== 0) {
       return res
         .status(400)
-        .send(errorCreator(frozen, 'Account frozen cannot view or edit'))
+        .send(errorCreator(frozen, 'Task frozen cannot view or edit'))
     }
     const result = await edit(id, name)
     return res.json({ result })
@@ -126,6 +131,117 @@ const task_freeze = async (req, res) => {
 }
 const accept_applicant = async (req, res) => {
   try {
-  } catch (exception) {}
+    const notValid = await validations(req, bodyValidator.applicantValidation)
+    if (notValid) {
+      return res
+        .status(400)
+        .send(errorCreator(validation, notValid.details[0].message))
+    }
+    const { applicantId, taskId } = req.body
+    const checkTask = await checkId('tasks', taskId)
+    if (checkTask === 0) {
+      return res.status(400).send(errorCreator(notFound, 'Task not found'))
+    }
+    const checkApplicant = await checkApp(taskId, applicantId)
+    if (checkApplicant === 0) {
+      return res
+        .status(400)
+        .send(errorCreator(notFound, 'Application not found'))
+    }
+    const checkFreeze = await checkFrozen('tasks', taskId, true)
+    if (checkFreeze !== 0) {
+      return res
+        .status(400)
+        .send(errorCreator(frozen, 'Task frozen cannot view or edit'))
+    }
+    const task = await acceptApp1(taskId, applicantId)
+    const application = await acceptApp2(taskId, applicantId)
+    return res.json({ task, application })
+  } catch (exception) {
+    console.log(exception)
+  }
 }
-module.exports = { task_create, task_edit, task_view, task_freeze }
+const task_apply = async (req, res) => {
+  try {
+    const notValid = await validations(req, bodyValidator.applicantValidation)
+    if (notValid) {
+      return res
+        .status(400)
+        .send(errorCreator(validation, notValid.details[0].message))
+    }
+    const { applicantId, taskId } = req.body
+    const checkUser = await checkId('accounts', applicantId)
+    if (checkUser === 0) {
+      return res.status(400).send(errorCreator(notFound, 'User not found'))
+    }
+    const checkTask = await checkId('tasks', taskId)
+    if (checkTask === 0) {
+      return res.status(400).send(errorCreator(notFound, 'Task not found'))
+    }
+    const checkFreeze = await checkFrozen('tasks', taskId, true)
+    if (checkFreeze !== 0) {
+      return res
+        .status(400)
+        .send(errorCreator(frozen, 'Task frozen cannot view or edit'))
+    }
+    const checkFreezen = await checkFrozen('accounts', applicantId, true)
+    if (checkFreezen !== 0) {
+      return res
+        .status(400)
+        .send(errorCreator(frozen, 'Account frozen cannot apply for task'))
+    }
+    const checkSus = await checkSuspend(applicantId, true)
+    if (checkSus !== 0) {
+      return res
+        .status(400)
+        .send(
+          errorCreator(suspension, 'Account suspended, cannot apply for task')
+        )
+    }
+    const application = await addApp(taskId, applicantId)
+    return res.json(application)
+  } catch (exception) {
+    console.log(exception)
+  }
+}
+const task_submit = async (req, res) => {
+  try {
+    const notValid = await validations(req, bodyValidator.submitValidation)
+    if (notValid) {
+      return res
+        .status(400)
+        .send(errorCreator(validation, notValid.details[0].message))
+    }
+    const { taskId, text } = req.body
+    const checkTask = await checkId('tasks', taskId)
+    if (checkTask === 0) {
+      return res.status(400).send(errorCreator(notFound, 'Task not found'))
+    }
+    const checkFreeze = await checkFrozen('tasks', taskId, true)
+    if (checkFreeze !== 0) {
+      return res
+        .status(400)
+        .send(errorCreator(frozen, 'Task frozen cannot view or edit'))
+    }
+    const task = await submitText(taskId, text, new Date())
+    return res.json(task)
+  } catch (exception) {
+    console.log(exception)
+  }
+}
+const task_completed = async (req, res) => {
+  try {
+  } catch (exception) {
+    console.log(exception)
+  }
+}
+module.exports = {
+  task_create,
+  task_edit,
+  task_view,
+  task_freeze,
+  accept_applicant,
+  task_apply,
+  task_submit,
+  task_completed
+}
