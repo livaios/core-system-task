@@ -49,11 +49,18 @@ const submitValidation = request => {
   }
   return Joi.validate(request, submitSchema)
 }
+const confirmValidation = request => {
+  const confirmSchema = {
+    taskId: Joi.number().required()
+  }
+  return Joi.validate(request, confirmSchema)
+}
 
 module.exports = {
   createValidation,
   editValidation,
   viewValidation,
   applicantValidation,
-  submitValidation
+  submitValidation,
+  confirmValidation
 }

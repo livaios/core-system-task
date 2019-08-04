@@ -180,6 +180,30 @@ const submitText = async (taskId, text, time) => {
     console.log(exception)
   }
 }
+const checkSubmitted = async taskId => {
+  try {
+    const query = {
+      text: 'SELECT * FROM tasks WHERE id = $1 AND submitted_task IS NOT NULL',
+      values: [taskId]
+    }
+    const res = await pool.query(query)
+    return res.rowCount
+  } catch (err) {
+    return err
+  }
+}
+const confirmTask = async taskId => {
+  try {
+    const query = {
+      text: 'UPDATE tasks SET is_confirmed = true WHERE id = $1 RETURNING *',
+      values: [taskId]
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (exception) {
+    console.log(exception)
+  }
+}
 module.exports = {
   create,
   edit,
@@ -191,5 +215,7 @@ module.exports = {
   acceptApp1,
   acceptApp2,
   addApp,
-  submitText
+  submitText,
+  checkSubmitted,
+  confirmTask
 }
