@@ -12,6 +12,7 @@ const wrongPassword = 'E001'
 const notFound = 'E001'
 
 const notSubmit = 'E001'
+const notMatch = 'E001'
 module.exports = {
   validation,
   usernameExist,
@@ -19,5 +20,6 @@ module.exports = {
   frozen,
   wrongPassword,
   notFound,
-  notSubmit
+  notSubmit,
+  notMatch
 }
