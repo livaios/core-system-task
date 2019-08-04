@@ -35,9 +35,25 @@ const viewValidation = request => {
   }
   return Joi.validate(request, viewSchema)
 }
+const applicantValidation = request => {
+  const applicantSchema = {
+    applicantId: Joi.number().required(),
+    taskId: Joi.number().required()
+  }
+  return Joi.validate(request, applicantSchema)
+}
+const submitValidation = request => {
+  const submitSchema = {
+    taskId: Joi.number().required(),
+    text: Joi.string().required()
+  }
+  return Joi.validate(request, submitSchema)
+}
 
 module.exports = {
   createValidation,
   editValidation,
-  viewValidation
+  viewValidation,
+  applicantValidation,
+  submitValidation
 }

@@ -117,11 +117,79 @@ const generateValues = req => {
   if (isFrozen !== undefined) whereValues.push(isFrozen)
   return whereValues
 }
+const checkApp = async (taskId, applicantId) => {
+  try {
+    const query = {
+      text: 'SELECT * FROM applications WHERE task_id = $1 AND user_id = $2',
+      values: [taskId, applicantId]
+    }
+    const res = await pool.query(query)
+    return res.rowCount
+  } catch (err) {
+    return err
+  }
+}
+const acceptApp1 = async (taskId, applicantId) => {
+  try {
+    const query = {
+      text: 'UPDATE tasks SET assigned_to = $2 WHERE id = $1 RETURNING *',
+      values: [taskId, applicantId]
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (exception) {
+    console.log(exception)
+  }
+}
+const acceptApp2 = async (taskId, applicantId) => {
+  try {
+    const query = {
+      text:
+        'UPDATE applications SET is_accepted = true WHERE task_id = $1 AND user_id = $2 RETURNING *',
+      values: [taskId, applicantId]
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (exception) {
+    console.log(exception)
+  }
+}
+const addApp = async (taskId, applicantId) => {
+  try {
+    const query = {
+      text:
+        'INSERT INTO applications(task_id, user_id) VALUES($1, $2) RETURNING *',
+      values: [taskId, applicantId]
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (exception) {
+    console.log(exception)
+  }
+}
+const submitText = async (taskId, text, time) => {
+  try {
+    const query = {
+      text:
+        'UPDATE tasks SET submitted_task = $2, end_date = $3 WHERE id = $1 RETURNING *',
+      values: [taskId, text, time]
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (exception) {
+    console.log(exception)
+  }
+}
 module.exports = {
   create,
   edit,
   generateWhere,
   generateOrder,
   generateValues,
-  view
+  view,
+  checkApp,
+  acceptApp1,
+  acceptApp2,
+  addApp,
+  submitText
 }
