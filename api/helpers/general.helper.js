@@ -59,6 +59,15 @@ const freezeEntity = async (table, id, tofreeze) => {
           ' SET is_frozen = $2 WHERE task_id = $1 RETURNING *',
         values: [id, tofreeze]
       }
+    }
+    if (table === 'attendances') {
+      query = {
+        text:
+          'UPDATE ' +
+          table +
+          ' SET is_frozen = $2 WHERE meeting_id = $1 RETURNING *',
+        values: [id, tofreeze]
+      }
     } else {
       query = {
         text:

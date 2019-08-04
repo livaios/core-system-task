@@ -191,7 +191,7 @@ const task_apply = async (req, res) => {
     if (checkFreezen !== 0) {
       return res
         .status(400)
-        .send(errorCreator(frozen, 'Account frozen cannot apply for task'))
+        .send(errorCreator(frozen, 'Account frozen cannot create for task'))
     }
     const checkSus = await checkSuspend(applicantId, true)
     if (checkSus !== 0) {
