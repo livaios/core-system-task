@@ -20,7 +20,8 @@ const {
   addApp,
   submitText,
   checkSubmitted,
-  confirmTask
+  confirmTask,
+  viewAll
 } = require('../helpers/task.helper')
 const bodyValidator = require('../helpers/validations/task.validation')
 const freezeValidator = require('../helpers/validations/general.validation')
@@ -101,7 +102,6 @@ const task_view = async (req, res) => {
     const orderBy = generateOrder(req.body)
     const values = generateValues(req.body)
     const views = await view(where, orderBy, values)
-    console.log(views)
     return res.json(views.rows)
   } catch (exception) {
     console.log(exception)
@@ -260,6 +260,14 @@ const task_completed = async (req, res) => {
     console.log(exception)
   }
 }
+const task_get = async (req, res) => {
+  try {
+    const tasks = await viewAll()
+    res.json({ tasks })
+  } catch (exception) {
+    console.log(exception)
+  }
+}
 module.exports = {
   task_create,
   task_edit,
@@ -268,5 +276,6 @@ module.exports = {
   accept_applicant,
   task_apply,
   task_submit,
-  task_completed
+  task_completed,
+  task_get
 }

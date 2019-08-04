@@ -16,12 +16,11 @@ const validations = (req, specialValidator) => {
     if (headerValid.error) return headerValid.error
     const bodyValid = specialValidator(req.body)
     if (bodyValid.error) {
-      console.log(bodyValid.error.details[0].message)
       return bodyValid.error
     }
     return false
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const checkId = async (table, id) => {
@@ -78,7 +77,7 @@ const freezeEntity = async (table, id, tofreeze) => {
     const res = await pool.query(query)
     return res.rows
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 

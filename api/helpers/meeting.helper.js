@@ -19,7 +19,6 @@ const createMeeting = async authorId => {
       values: [authorId]
     }
     const res = await pool.query(query)
-    console.log(res)
     return res.rows[0]
   } catch (err) {
     return err
@@ -54,23 +53,15 @@ const getUser = async taskId => {
 }
 const addTasks = async (tasks, meetingId) => {
   try {
-    const users = []
+    const result = []
     for (i = 0; i < tasks.length; i++) {
       const user = await getUser(tasks[i])
-      console.log(user[0])
-      users.push(user[0])
+      const one = await createAttendance(user[0], tasks[i], false, meetingId)
+      result.push(one)
     }
-    for (i = 0; i < tasks.length; i++) {
-      const query = {
-        text:
-          'INSERT INTO attendances(meeting_id,task_id,user_id) VALUES($1,$2,$3) RETURNING *',
-        values: [meetingId, tasks[i], users[i]]
-      }
-      const res = await pool.query(query)
-      return res.rows[0]
-    }
+    return result
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const checkAttendance = async (meetingId, userId) => {
@@ -93,9 +84,9 @@ const confirmMeeting = async (meetingId, userId) => {
       values: [userId, meetingId]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const finalConfirm = async meetingId => {
@@ -108,7 +99,7 @@ const finalConfirm = async meetingId => {
     const res = await pool.query(query)
     return res.rows
   } catch (exception) {
-    console.log(exception)
+    return exception
   }
 }
 const confirm = async meetingId => {
@@ -118,9 +109,21 @@ const confirm = async meetingId => {
       values: [meetingId]
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
-    console.log(exception)
+    return exception
+  }
+}
+const view = async () => {
+  try {
+    const query = {
+      text:
+        'SELECT * FROM meetings m INNER JOIN attendances a ON m.id = a.meeting_id WHERE m.is_frozen = false GROUP BY m.id,a.meeting_id,a.task_id'
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (err) {
+    return err
   }
 }
 
@@ -132,5 +135,6 @@ module.exports = {
   checkAttendance,
   confirmMeeting,
   finalConfirm,
-  confirm
+  confirm,
+  view
 }
