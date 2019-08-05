@@ -73,9 +73,21 @@ const freezeEntity = async (table, id, tofreeze) => {
       }
     }
     const res = await pool.query(query)
-    return res.rows
+    return res.rows[0]
   } catch (exception) {
     return exception
+  }
+}
+const viewId = async (table, id) => {
+  try {
+    const query = {
+      text: 'SELECT * FROM ' + table + ' WHERE id = $1',
+      values: [id]
+    }
+    const res = await pool.query(query)
+    return res.rows[0]
+  } catch (err) {
+    return err
   }
 }
 
@@ -83,5 +95,6 @@ module.exports = {
   checkFrozen,
   validations,
   checkId,
-  freezeEntity
+  freezeEntity,
+  viewId
 }

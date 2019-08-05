@@ -3,7 +3,8 @@ const {
   checkFrozen,
   validations,
   checkId,
-  freezeEntity
+  freezeEntity,
+  viewId
 } = require('../helpers/general.helper')
 
 const { checkSuspend } = require('../helpers/accounts.helper')
@@ -111,7 +112,8 @@ const meeting_create = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ meeting, attendance })
@@ -160,7 +162,8 @@ const meeting_edit = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ tasks })
@@ -223,7 +226,8 @@ const meeting_confirm = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ attend, meeting })
@@ -274,7 +278,8 @@ const meeting_freeze = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ result, attends })
@@ -295,10 +300,33 @@ const meeting_get = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ meetings })
+  } catch (exception) {
+    await pool.query('ROLLBACK')
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
+  }
+}
+const meeting_get_id = async (req, res) => {
+  try {
+    await pool.query('BEGIN')
+    const meeting = await viewId('meetings', req.body.id)
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id'],
+      message: 'success'
+    })
+    await pool.query('COMMIT')
+    return res.json({ meeting })
   } catch (exception) {
     await pool.query('ROLLBACK')
     res.set({
@@ -314,5 +342,6 @@ module.exports = {
   meeting_edit,
   meeting_confirm,
   meeting_freeze,
-  meeting_get
+  meeting_get,
+  meeting_get_id
 }

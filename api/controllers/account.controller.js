@@ -7,7 +7,8 @@ const {
   checkFrozen,
   validations,
   freezeEntity,
-  checkId
+  checkId,
+  viewId
 } = require('../helpers/general.helper')
 const {
   checkUsername,
@@ -55,7 +56,8 @@ const account_signup = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ user })
@@ -122,7 +124,8 @@ const account_signin = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     jwt.sign({ username, id }, 'privatekey', (err, token) => {
       if (err) {
@@ -186,7 +189,8 @@ const account_suspend = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ result })
@@ -236,7 +240,8 @@ const account_freeze = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ result })
@@ -257,10 +262,34 @@ const account_get = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ accounts })
+  } catch (exception) {
+    await pool.query('ROLLBACK')
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
+  }
+}
+const account_get_id = async (req, res) => {
+  try {
+    await pool.query('BEGIN')
+    const account = await viewId('accounts', req.body.id)
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id'],
+      message: 'success'
+    })
+    await pool.query('COMMIT')
+    console.log(account)
+    return res.json({ account })
   } catch (exception) {
     await pool.query('ROLLBACK')
     res.set({
@@ -276,5 +305,6 @@ module.exports = {
   account_suspend,
   account_signin,
   account_freeze,
-  account_get
+  account_get,
+  account_get_id
 }

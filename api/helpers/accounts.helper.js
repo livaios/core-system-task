@@ -64,8 +64,7 @@ const checkCredentials = async (username, password) => {
 const view = async () => {
   try {
     const query = {
-      text:
-        'SELECT * FROM accounts a INNER JOIN tasks t ON a.id = t.author_id WHERE a.is_frozen = false GROUP BY a.id,t.id'
+      text: 'SELECT * FROM accounts WHERE is_frozen = false ORDER BY id'
     }
     const res = await pool.query(query)
     return res.rows
