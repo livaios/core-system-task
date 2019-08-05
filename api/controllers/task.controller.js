@@ -1,3 +1,5 @@
+const { pool } = require('../../config/DBConfig')
+
 const {
   checkFrozen,
   validations,
@@ -39,6 +41,7 @@ const {
 
 const task_create = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.createValidation)
     if (notValid) {
       res.set({
@@ -82,8 +85,10 @@ const task_create = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ task })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -94,6 +99,7 @@ const task_create = async (req, res) => {
 }
 const task_edit = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.editValidation)
     if (notValid) {
       res.set({
@@ -128,8 +134,10 @@ const task_edit = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ result })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -140,6 +148,7 @@ const task_edit = async (req, res) => {
 }
 const task_view = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.viewValidation)
     if (notValid) {
       res.set({
@@ -158,8 +167,10 @@ const task_view = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json(views.rows)
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -170,6 +181,7 @@ const task_view = async (req, res) => {
 }
 const task_freeze = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, freezeValidator.freezeValidations)
     if (notValid) {
       res.set({
@@ -206,8 +218,10 @@ const task_freeze = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ result, applications })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -218,6 +232,7 @@ const task_freeze = async (req, res) => {
 }
 const accept_applicant = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.applicantValidation)
     if (notValid) {
       res.set({
@@ -262,8 +277,10 @@ const accept_applicant = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ task, application })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -274,6 +291,7 @@ const accept_applicant = async (req, res) => {
 }
 const task_apply = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.applicantValidation)
     if (notValid) {
       res.set({
@@ -335,8 +353,10 @@ const task_apply = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json(application)
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -347,6 +367,7 @@ const task_apply = async (req, res) => {
 }
 const task_submit = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.submitValidation)
     if (notValid) {
       res.set({
@@ -381,8 +402,10 @@ const task_submit = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json(task)
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -393,6 +416,7 @@ const task_submit = async (req, res) => {
 }
 const task_completed = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.confirmValidation)
     if (notValid) {
       res.set({
@@ -437,8 +461,10 @@ const task_completed = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json(task)
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -449,14 +475,17 @@ const task_completed = async (req, res) => {
 }
 const task_get = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const tasks = await viewAll()
     res.set({
       statusCode: success,
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     res.json({ tasks })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),

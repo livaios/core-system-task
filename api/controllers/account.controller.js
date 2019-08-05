@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-
+const { pool } = require('../../config/DBConfig')
 const bodyValidator = require('../helpers/validations/account.validation')
 const freezeValidator = require('../helpers/validations/general.validation')
 
@@ -30,6 +30,7 @@ const {
 
 const account_signup = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.credentialsValidation)
     if (notValid) {
       res.set({
@@ -50,13 +51,16 @@ const account_signup = async (req, res) => {
       return res.status(400).send()
     }
     const user = await sign_up(username, password)
+
     res.set({
       statusCode: success,
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ user })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -67,6 +71,7 @@ const account_signup = async (req, res) => {
 }
 const account_signin = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.credentialsValidation)
     if (notValid) {
       res.set({
@@ -125,7 +130,9 @@ const account_signin = async (req, res) => {
       }
       res.send(token)
     })
+    await pool.query('COMMIT')
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -136,6 +143,7 @@ const account_signin = async (req, res) => {
 }
 const account_suspend = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.suspendValidation)
     if (notValid) {
       res.set({
@@ -180,8 +188,10 @@ const account_suspend = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ result })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -192,6 +202,7 @@ const account_suspend = async (req, res) => {
 }
 const account_freeze = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, freezeValidator.freezeValidations)
     if (notValid) {
       res.set({
@@ -227,8 +238,10 @@ const account_freeze = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ result })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -239,14 +252,17 @@ const account_freeze = async (req, res) => {
 }
 const account_get = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const accounts = await view()
     res.set({
       statusCode: success,
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ accounts })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),

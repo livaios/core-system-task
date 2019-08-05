@@ -1,3 +1,4 @@
+const { pool } = require('../../config/DBConfig')
 const {
   checkFrozen,
   validations,
@@ -35,6 +36,7 @@ const {
 
 const meeting_create = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.createValidation)
     if (notValid) {
       res.set({
@@ -111,8 +113,10 @@ const meeting_create = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ meeting, attendance })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -123,6 +127,7 @@ const meeting_create = async (req, res) => {
 }
 const meeting_edit = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.addValidation)
     if (notValid) {
       res.set({
@@ -157,8 +162,10 @@ const meeting_edit = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ tasks })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -169,6 +176,7 @@ const meeting_edit = async (req, res) => {
 }
 const meeting_confirm = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, bodyValidator.confirmValidation)
     if (notValid) {
       res.set({
@@ -217,8 +225,10 @@ const meeting_confirm = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ attend, meeting })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -229,6 +239,7 @@ const meeting_confirm = async (req, res) => {
 }
 const meeting_freeze = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const notValid = await validations(req, freezeValidator.freezeValidations)
     if (notValid) {
       res.set({
@@ -265,8 +276,10 @@ const meeting_freeze = async (req, res) => {
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ result, attends })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
@@ -277,14 +290,17 @@ const meeting_freeze = async (req, res) => {
 }
 const meeting_get = async (req, res) => {
   try {
+    await pool.query('BEGIN')
     const meetings = await view()
     res.set({
       statusCode: success,
       timestamp: new Date(),
       request_id: req.headers['request_id']
     })
+    await pool.query('COMMIT')
     return res.json({ meetings })
   } catch (exception) {
+    await pool.query('ROLLBACK')
     res.set({
       statusCode: unknown,
       timestamp: new Date(),
