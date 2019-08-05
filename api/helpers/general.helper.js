@@ -1,8 +1,6 @@
 const { pool } = require('../../config/DBConfig')
 const validator = require('../helpers/validations/general.validation')
 
-const errorCreator = (code, message) => ({ error: { code, message } })
-
 const validations = (req, specialValidator) => {
   try {
     const channel = req.headers['channel']
@@ -82,7 +80,6 @@ const freezeEntity = async (table, id, tofreeze) => {
 }
 
 module.exports = {
-  errorCreator,
   checkFrozen,
   validations,
   checkId,
