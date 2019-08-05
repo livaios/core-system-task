@@ -4,7 +4,8 @@ const {
   checkFrozen,
   validations,
   checkId,
-  freezeEntity
+  freezeEntity,
+  viewId
 } = require('../helpers/general.helper')
 
 const { checkSuspend } = require('../helpers/accounts.helper')
@@ -83,10 +84,11 @@ const task_create = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
-    return res.json({ task })
+    return res.json({ task }).end()
   } catch (exception) {
     await pool.query('ROLLBACK')
     res.set({
@@ -132,7 +134,8 @@ const task_edit = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ result })
@@ -165,7 +168,8 @@ const task_view = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json(views.rows)
@@ -216,7 +220,8 @@ const task_freeze = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ result, applications })
@@ -275,7 +280,8 @@ const accept_applicant = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json({ task, application })
@@ -351,7 +357,8 @@ const task_apply = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json(application)
@@ -400,7 +407,8 @@ const task_submit = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json(task)
@@ -459,7 +467,8 @@ const task_completed = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     return res.json(task)
@@ -480,10 +489,33 @@ const task_get = async (req, res) => {
     res.set({
       statusCode: success,
       timestamp: new Date(),
-      request_id: req.headers['request_id']
+      request_id: req.headers['request_id'],
+      message: 'success'
     })
     await pool.query('COMMIT')
     res.json({ tasks })
+  } catch (exception) {
+    await pool.query('ROLLBACK')
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
+  }
+}
+const task_get_id = async (req, res) => {
+  try {
+    await pool.query('BEGIN')
+    const task = await viewId('tasks', req.body.id)
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id'],
+      message: 'success'
+    })
+    await pool.query('COMMIT')
+    return res.json({ task })
   } catch (exception) {
     await pool.query('ROLLBACK')
     res.set({
@@ -503,5 +535,6 @@ module.exports = {
   task_apply,
   task_submit,
   task_completed,
-  task_get
+  task_get,
+  task_get_id
 }
