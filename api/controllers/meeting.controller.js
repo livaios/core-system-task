@@ -1,5 +1,4 @@
 const {
-  errorCreator,
   checkFrozen,
   validations,
   checkId,
@@ -22,62 +21,84 @@ const bodyValidator = require('../helpers/validations/meeting.validation')
 const freezeValidator = require('../helpers/validations/general.validation')
 
 const {
+  success,
   validation,
-  notFound,
+  accountNotFound,
   suspension,
   frozen,
-  notMatch
+  notMatch,
+  attendanceNotFound,
+  unknown,
+  taskNotFound,
+  meetingNotFound
 } = require('../constants/errorCodes')
 
 const meeting_create = async (req, res) => {
   try {
     const notValid = await validations(req, bodyValidator.createValidation)
     if (notValid) {
-      return res
-        .status(400)
-        .send(errorCreator(validation, notValid.details[0].message))
+      res.set({
+        statusCode: validation,
+        timestamp: new Date(),
+        message: notValid.details[0].message
+      })
+      return res.status(400).send()
     }
     const { authorId, taskId } = req.body
     const checkUser = await checkId('accounts', authorId)
     if (checkUser === 0) {
-      return res.status(400).send(errorCreator(notFound, 'User not found'))
+      res.set({
+        statusCode: accountNotFound,
+        timestamp: new Date(),
+        message: 'Account does not exist'
+      })
+      return res.status(400).send()
     }
     const checkSus = await checkSuspend(authorId, true)
     if (checkSus !== 0) {
-      return res
-        .status(400)
-        .send(
-          errorCreator(suspension, 'Account suspended, cannot create meeting')
-        )
+      res.set({
+        statusCode: suspension,
+        timestamp: new Date(),
+        message: 'Account suspended, cannot create meeting'
+      })
+      return res.status(400).send()
     }
     const checkFreezen = await checkFrozen('accounts', authorId, true)
     if (checkFreezen !== 0) {
-      return res
-        .status(400)
-        .send(errorCreator(frozen, 'Account frozen, cannot create meeting'))
+      res.set({
+        statusCode: frozen,
+        timestamp: new Date(),
+        message: 'Account frozen, cannot create meeting'
+      })
+      return res.status(400).send()
     }
     const checkTask = await checkId('tasks', taskId)
     if (checkTask === 0) {
-      return res
-        .status(400)
-        .send(errorCreator(notFound, 'Task not found, cannot create meeting'))
+      res.set({
+        statusCode: taskNotFound,
+        timestamp: new Date(),
+        message: 'Task not found'
+      })
+      return res.status(400).send()
     }
     const checkFreeze = await checkFrozen('tasks', taskId, true)
     if (checkFreeze !== 0) {
-      return res
-        .status(400)
-        .send(errorCreator(frozen, 'Task frozen , cannot create meeting'))
+      res.set({
+        statusCode: frozen,
+        timestamp: new Date(),
+        message: 'Task frozen, cannot create meeting'
+      })
+      return res.status(400).send()
     }
     const checkAuthor = await matchAuthor(authorId, taskId)
-    if (checkAuthor === 0)
-      return res
-        .status(400)
-        .send(
-          errorCreator(
-            notMatch,
-            'Task does not belong to user, cannot create meeting'
-          )
-        )
+    if (checkAuthor === 0) {
+      res.set({
+        statusCode: notMatch,
+        timestamp: new Date(),
+        message: 'Task does not belong to user, cannot create meeting'
+      })
+      return res.status(400).send()
+    }
     const meeting = await createMeeting(authorId)
     const attendance = await createAttendance(
       authorId,
@@ -85,58 +106,105 @@ const meeting_create = async (req, res) => {
       true,
       meeting.id
     )
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id']
+    })
     return res.json({ meeting, attendance })
   } catch (exception) {
-    console.log(exception)
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
   }
 }
 const meeting_edit = async (req, res) => {
   try {
-    const isValid = await validations(req, bodyValidator.addValidation)
-    if (isValid) {
-      return res
-        .status(400)
-        .send(errorCreator(validation, isValid.details[0].message))
+    const notValid = await validations(req, bodyValidator.addValidation)
+    if (notValid) {
+      res.set({
+        statusCode: validation,
+        timestamp: new Date(),
+        message: notValid.details[0].message
+      })
+      return res.status(400).send()
     }
     const { newTasks, meetingId } = req.body
     const checkMeeting = await checkId('meetings', meetingId)
     if (checkMeeting === 0) {
-      return res.status(400).send(errorCreator(notFound, 'Meeting not found'))
+      res.set({
+        statusCode: meetingNotFound,
+        timestamp: new Date(),
+        message: 'meeting not found'
+      })
+      return res.status(400).send()
     }
     const checkFreeze = await checkFrozen('meetings', meetingId, true)
     if (checkFreeze !== 0) {
-      return res
-        .status(400)
-        .send(errorCreator(frozen, 'meeting frozen can not edit '))
+      res.set({
+        statusCode: frozen,
+        timestamp: new Date(),
+        message: 'meeting frozen can not edit'
+      })
+      return res.status(400).send()
     }
     const tasks = await addTasks(newTasks, meetingId)
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id']
+    })
     return res.json({ tasks })
   } catch (exception) {
-    console.log(exception)
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
   }
 }
 const meeting_confirm = async (req, res) => {
   try {
-    const isValid = await validations(req, bodyValidator.confirmValidation)
-    if (isValid) {
-      return res
-        .status(400)
-        .send(errorCreator(validation, isValid.details[0].message))
+    const notValid = await validations(req, bodyValidator.confirmValidation)
+    if (notValid) {
+      res.set({
+        statusCode: validation,
+        timestamp: new Date(),
+        message: notValid.details[0].message
+      })
+      return res.status(400).send()
     }
     const { userId, meetingId } = req.body
     const checkMeeting = await checkId('meetings', meetingId)
     if (checkMeeting === 0) {
-      return res.status(400).send(errorCreator(notFound, 'Meeting not found'))
+      res.set({
+        statusCode: meetingNotFound,
+        timestamp: new Date(),
+        message: 'meeting not found'
+      })
+      return res.status(400).send()
     }
     const checkFreeze = await checkFrozen('meetings', meetingId, true)
     if (checkFreeze !== 0) {
-      return res
-        .status(400)
-        .send(errorCreator(frozen, 'meeting frozen can not edit '))
+      res.set({
+        statusCode: frozen,
+        timestamp: new Date(),
+        message: 'meeting frozen can not edit'
+      })
+      return res.status(400).send()
     }
     const checkAttend = await checkAttendance(userId, meetingId)
     if (checkAttend === 0) {
-      return res.status(400).send(errorCreator(notFound, 'User not invited'))
+      res.set({
+        statusCode: attendanceNotFound,
+        timestamp: new Date(),
+        message: 'User not invited'
+      })
+      return res.status(400).send()
     }
     const attend = await confirmMeeting(userId, meetingId)
     const checkFinalConfirm = await finalConfirm(meetingId)
@@ -144,44 +212,85 @@ const meeting_confirm = async (req, res) => {
     if (checkFinalConfirm.length === 0) {
       meeting = await confirm(meetingId)
     }
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id']
+    })
     return res.json({ attend, meeting })
   } catch (exception) {
-    console.log(exception)
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
   }
 }
 const meeting_freeze = async (req, res) => {
   try {
-    const isValid = await validations(req, freezeValidator.freezeValidations)
-    if (isValid) {
-      return res
-        .status(400)
-        .send(errorCreator(validation, isValid.details[0].message))
+    const notValid = await validations(req, freezeValidator.freezeValidations)
+    if (notValid) {
+      res.set({
+        statusCode: validation,
+        timestamp: new Date(),
+        message: notValid.details[0].message
+      })
+      return res.status(400).send()
     }
     const { id, toFreeze } = req.body
     const checkMeeting = await checkId('meetings', id)
     if (checkMeeting === 0) {
-      return res.status(400).send(errorCreator(notFound, 'Meeting not found'))
+      res.set({
+        statusCode: meetingNotFound,
+        timestamp: new Date(),
+        message: 'meeting not found'
+      })
+      return res.status(400).send()
     }
     const checkFreeze = await checkFrozen('meetings', id, toFreeze)
     if (checkFreeze !== 0) {
       const fro = toFreeze ? 'frozen' : 'unfrozen'
-      return res
-        .status(400)
-        .send(errorCreator(frozen, 'meeting already ' + fro))
+      res.set({
+        statusCode: frozen,
+        timestamp: new Date(),
+        message: 'meeting already ' + fro
+      })
+      return res.status(400).send()
     }
     const result = await freezeEntity('meetings', id, toFreeze)
     const attends = await freezeEntity('attendances', id, toFreeze)
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id']
+    })
     return res.json({ result, attends })
   } catch (exception) {
-    console.log(exception)
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
   }
 }
 const meeting_get = async (req, res) => {
   try {
     const meetings = await view()
-    res.json({ meetings })
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id']
+    })
+    return res.json({ meetings })
   } catch (exception) {
-    console.log(exception)
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
   }
 }
 module.exports = {
