@@ -288,7 +288,6 @@ const account_get_id = async (req, res) => {
       message: 'success'
     })
     await pool.query('COMMIT')
-    console.log(account)
     return res.json({ account })
   } catch (exception) {
     await pool.query('ROLLBACK')

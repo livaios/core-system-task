@@ -23,7 +23,8 @@ const {
   submitText,
   checkSubmitted,
   confirmTask,
-  viewAll
+  viewAll,
+  viewAllApplications
 } = require('../helpers/task.helper')
 const bodyValidator = require('../helpers/validations/task.validation')
 const freezeValidator = require('../helpers/validations/general.validation')
@@ -526,6 +527,28 @@ const task_get_id = async (req, res) => {
     return res.status(400).send()
   }
 }
+const task_get_app = async (req, res) => {
+  try {
+    await pool.query('BEGIN')
+    const appl = await viewAllApplications(req.body.id)
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id'],
+      message: 'success'
+    })
+    await pool.query('COMMIT')
+    return res.json({ appl })
+  } catch (exception) {
+    await pool.query('ROLLBACK')
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
+  }
+}
 module.exports = {
   task_create,
   task_edit,
@@ -536,5 +559,6 @@ module.exports = {
   task_submit,
   task_completed,
   task_get,
-  task_get_id
+  task_get_id,
+  task_get_app
 }

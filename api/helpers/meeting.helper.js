@@ -126,7 +126,18 @@ const view = async () => {
     return err
   }
 }
-
+const viewAllAttends = async id => {
+  try {
+    const query = {
+      text: 'SELECT * FROM attendances WHERE meeting_id = $1',
+      values: [id]
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (err) {
+    return err
+  }
+}
 module.exports = {
   matchAuthor,
   createMeeting,
@@ -136,5 +147,6 @@ module.exports = {
   confirmMeeting,
   finalConfirm,
   confirm,
-  view
+  view,
+  viewAllAttends
 }

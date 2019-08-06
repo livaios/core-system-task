@@ -14,7 +14,8 @@ const {
   task_completed,
   task_submit,
   task_get,
-  task_get_id
+  task_get_id,
+  task_get_app
 } = taskController
 
 router.post('/create', task_create)
@@ -27,5 +28,6 @@ router.post('/submit', task_submit)
 router.post('/confirm', task_completed)
 router.post('/getAll', task_get)
 router.post('/getId', task_get_id)
+router.post('/getApps', task_get_app)
 
 module.exports = router

@@ -10,7 +10,8 @@ const {
   meeting_confirm,
   meeting_freeze,
   meeting_get,
-  meeting_get_id
+  meeting_get_id,
+  meeting_get_attends
 } = meetingController
 
 router.post('/create', meeting_create)
@@ -19,5 +20,5 @@ router.post('/confirm', meeting_confirm)
 router.post('/freeze', meeting_freeze)
 router.post('/getAll', meeting_get)
 router.post('/getId', meeting_get_id)
-
+router.post('/getAttends', meeting_get_attends)
 module.exports = router

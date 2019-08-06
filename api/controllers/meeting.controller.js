@@ -17,7 +17,8 @@ const {
   confirmMeeting,
   finalConfirm,
   confirm,
-  view
+  view,
+  viewAllAttends
 } = require('../helpers/meeting.helper')
 const bodyValidator = require('../helpers/validations/meeting.validation')
 const freezeValidator = require('../helpers/validations/general.validation')
@@ -208,7 +209,7 @@ const meeting_confirm = async (req, res) => {
       })
       return res.status(400).send()
     }
-    const checkAttend = await checkAttendance(userId, meetingId)
+    const checkAttend = await checkAttendance(meetingId, userId)
     if (checkAttend === 0) {
       res.set({
         statusCode: attendanceNotFound,
@@ -217,7 +218,7 @@ const meeting_confirm = async (req, res) => {
       })
       return res.status(400).send()
     }
-    const attend = await confirmMeeting(userId, meetingId)
+    const attend = await confirmMeeting(meetingId, userId)
     const checkFinalConfirm = await finalConfirm(meetingId)
     let meeting
     if (checkFinalConfirm.length === 0) {
@@ -337,11 +338,34 @@ const meeting_get_id = async (req, res) => {
     return res.status(400).send()
   }
 }
+const meeting_get_attends = async (req, res) => {
+  try {
+    await pool.query('BEGIN')
+    const attend = await viewAllAttends(req.body.id)
+    res.set({
+      statusCode: success,
+      timestamp: new Date(),
+      request_id: req.headers['request_id'],
+      message: 'success'
+    })
+    await pool.query('COMMIT')
+    return res.json({ attend })
+  } catch (exception) {
+    await pool.query('ROLLBACK')
+    res.set({
+      statusCode: unknown,
+      timestamp: new Date(),
+      message: 'unknown error'
+    })
+    return res.status(400).send()
+  }
+}
 module.exports = {
   meeting_create,
   meeting_edit,
   meeting_confirm,
   meeting_freeze,
   meeting_get,
-  meeting_get_id
+  meeting_get_id,
+  meeting_get_attends
 }

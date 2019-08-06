@@ -206,8 +206,19 @@ const confirmTask = async taskId => {
 const viewAll = async () => {
   try {
     const query = {
-      text:
-        'SELECT * FROM tasks t INNER JOIN applications a ON t.id = a.task_id WHERE t.is_frozen = false GROUP BY t.id,a.task_id,a.user_id'
+      text: 'SELECT * FROM tasks WHERE is_frozen = false ORDER BY id'
+    }
+    const res = await pool.query(query)
+    return res.rows
+  } catch (err) {
+    return err
+  }
+}
+const viewAllApplications = async id => {
+  try {
+    const query = {
+      text: 'SELECT * FROM applications WHERE task_id = $1',
+      values: [id]
     }
     const res = await pool.query(query)
     return res.rows
@@ -229,5 +240,6 @@ module.exports = {
   submitText,
   checkSubmitted,
   confirmTask,
-  viewAll
+  viewAll,
+  viewAllApplications
 }
