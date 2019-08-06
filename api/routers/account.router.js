@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 
 const accountController = require('../controllers/account.controller')
-
+const cache = require('../cache')
 const {
   account_signup,
   account_signin,
@@ -17,6 +17,6 @@ router.post('/signup', account_signup)
 router.post('/signin', account_signin)
 router.post('/suspend', account_suspend)
 router.post('/freeze', account_freeze)
-router.post('/getAll', account_get)
+router.get('/getAll', cache(10), account_get)
 router.post('/getId', account_get_id)
 module.exports = router
