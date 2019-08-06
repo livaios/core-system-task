@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 
 const taskController = require('../controllers/task.controller')
-
+const cache = require('../cache')
 const {
   task_create,
   task_edit,
@@ -26,7 +26,7 @@ router.post('/accept', accept_applicant)
 router.post('/apply', task_apply)
 router.post('/submit', task_submit)
 router.post('/confirm', task_completed)
-router.post('/getAll', task_get)
+router.get('/getAll', cache(10), task_get)
 router.post('/getId', task_get_id)
 router.post('/getApps', task_get_app)
 

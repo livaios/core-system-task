@@ -3,7 +3,7 @@ const express = require('express')
 const router = express.Router()
 
 const meetingController = require('../controllers/meeting.controller')
-
+const cache = require('../cache')
 const {
   meeting_create,
   meeting_edit,
@@ -18,7 +18,7 @@ router.post('/create', meeting_create)
 router.post('/edit', meeting_edit)
 router.post('/confirm', meeting_confirm)
 router.post('/freeze', meeting_freeze)
-router.post('/getAll', meeting_get)
+router.get('/getAll', cache(10), meeting_get)
 router.post('/getId', meeting_get_id)
 router.post('/getAttends', meeting_get_attends)
 module.exports = router
